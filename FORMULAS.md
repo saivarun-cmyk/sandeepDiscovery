@@ -1,6 +1,16 @@
 # Formula guide
 
-All calculations use completed **daily bars**. Indices are excluded, as requested.
+All calculations use completed **daily bars**. Indian and US universes are scanned separately. Indices are not ranked.
+
+## Market tabs and symbols
+
+India: 207 stocks, Top 20 per side, INR, dates in Asia/Kolkata; same-day scans after 16:00 IST.
+
+US: the 47 supplied instruments (45 equities plus 2 futures proxies), Top 8 per side, USD. Dates use America/New_York with daylight saving. Same-day scans open at 18:00 New York time to allow the futures daily session to finish. This is a conservative cutoff on early-close days. Weekends roll back; select the prior session on exchange holidays.
+
+BRK.A and BRK.B map to Yahoo BRK-A and BRK-B. SPCX is preserved as supplied. GC1! maps to Yahoo GC=F and SI1! to SI=F. These are labelled futures proxies, not identical TradingView continuous contracts. Vendor rolls/adjustments can differ. Futures use their own observed daily session dates; missing futures sessions cannot be independently verified, so US results carry a provisional note. Equity calendars use the market's benchmark (^NSEI or ^GSPC) plus equity dates; futures dates never add equity holidays.
+
+Each market button downloads its entire universe again. Search, filters and downloads do not rerun the scan. Results and failures are isolated by market. No currency conversion is performed; ranking scores are percentages. Both markets use the same discovery and indicator formulas.
 
 ## Daily discovery — supplied PDF
 
@@ -18,7 +28,7 @@ Bullish: Close > VAH AND Close > monthly AVWAP. Score (%) = 100 × (Close / VAH 
 
 Bearish: Close < VAL AND Close < monthly AVWAP. Score (%) = 100 × (1 − Close / VAL).
 
-Rank each side by score descending; alphabetical symbol breaks ties. Return up to 20 qualifiers per side. Equality is neutral. These qualification rules were approved separately; they are not stated in the PDF.
+Rank each side by score descending; alphabetical symbol breaks ties. Return up to 20 qualifiers per side in India and 8 in the US. Lists are not padded when fewer qualify. Equality is neutral. These qualification rules were approved separately; they are not stated in the PDF.
 
 ## EMA13 distance — supplied screenshot
 

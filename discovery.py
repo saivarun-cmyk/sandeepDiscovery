@@ -78,7 +78,7 @@ def calculate(symbol, raw, as_of, sessions):
                 previous_window_start=str(previous[0]), previous_window_end=str(previous[-1]))
 
 
-def rank(results, mode):
+def rank(results, mode, top_n=20):
     """Optional proposed rule, deliberately separate from PDF calculations."""
     bullish, bearish = [], []
     for row in results:
@@ -99,7 +99,7 @@ def rank(results, mode):
         group.sort(key=lambda r: (-r['score_pct'], r['symbol']))
         for n, row in enumerate(group, 1):
             row['rank'] = n
-    return bullish[:20], bearish[:20]
+    return bullish[:top_n], bearish[:top_n]
 
 
 FIELDS = ['symbol', 'date', 'close', 'previous_3_high', 'previous_3_low', 'range_3',
@@ -131,7 +131,7 @@ def report(folder, results, errors, bullish, bearish, metadata):
     (folder / 'report.html').write_text('<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Sandeep Discovery</title><style>body{font:15px system-ui;background:#f4f6fa;color:#192b43;margin:36px auto;padding:0 24px;max-width:1400px}h1{font-size:36px}h2{margin-top:34px}.notice{padding:16px;background:#e1ebf7;border-left:4px solid #396b9f}.scroll{overflow:auto;background:white;border:1px solid #dce2eb;border-radius:8px}table{border-collapse:collapse;width:100%;white-space:nowrap}th,td{padding:12px;text-align:right;border-bottom:1px solid #e6eaf0}th{background:#192b43;color:white;text-transform:capitalize}td:first-child,th:first-child{text-align:left}</style><body>'+body+'</body></html>', encoding='utf-8')
 
 
-def download(active, as_of, progress=None, history_days=550):
+def download(active, as_of, progress=None, history_days=550, benchmark_symbol='^NSEI'):
     try:
         import yfinance as yf
     except ImportError as exc:
@@ -140,10 +140,10 @@ def download(active, as_of, progress=None, history_days=550):
     # Longer history supports SMA50 and EMA/ATR warm-up for the setup scans.
     start = min(as_of.replace(day=1) - timedelta(days=20), as_of - timedelta(days=history_days))
     end = as_of + timedelta(days=1)
-    benchmark = yf.download('^NSEI', start=str(start), end=str(end), auto_adjust=False,
+    benchmark = yf.download(benchmark_symbol, start=str(start), end=str(end), auto_adjust=False,
                             progress=False, multi_level_index=False)
     if benchmark is None or benchmark.empty:
-        raise ValueError('Yahoo returned no NIFTY calendar data; cannot verify sessions')
+        raise ValueError(f'Yahoo returned no {benchmark_symbol} calendar data; cannot verify sessions')
     sessions = {stamp.date() for stamp, row in benchmark.iterrows() if math.isfinite(float(row['Close']))}
     rows, failures = [], []
     for n, item in enumerate(active, 1):
@@ -161,12 +161,13 @@ def download(active, as_of, progress=None, history_days=550):
             failures.append({'symbol': item['symbol'], 'issue': 'Download failed: '+str(exc)})
         if progress:
             progress(n, len(active), item['symbol'])
-    stock_dates = {date.fromisoformat(row['date']) for row in rows if math.isfinite(row['close']) and row['volume'] > 0}
+    futures = {item['symbol'] for item in active if item.get('asset_type') == 'Futures proxy'}
+    stock_dates = {date.fromisoformat(row['date']) for row in rows if row['symbol'] not in futures and math.isfinite(row['close']) and row['volume'] > 0}
     extra = sorted(stock_dates - sessions)
     sessions |= stock_dates
-    note = 'Sessions inferred from Yahoo NIFTY and stock daily bars; verify provider completeness.'
+    note = f'Sessions inferred from Yahoo {benchmark_symbol} and equity daily bars; verify provider completeness.'
     if extra:
-        note = 'PROVISIONAL: stock dates absent from NIFTY calendar: ' + ', '.join(map(str, extra)) + '. Union of dates used; verify exchange calendar before using shortlists.'
+        note = f'PROVISIONAL: stock dates absent from {benchmark_symbol} calendar: ' + ', '.join(map(str, extra)) + '. Union of equity dates used; verify exchange calendar before using shortlists.'
     return rows, sessions, failures, note, bool(extra)
 
 

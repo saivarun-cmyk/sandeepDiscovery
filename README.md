@@ -2,6 +2,14 @@
 
 Daily research scanner for the 207 enabled stocks in the supplied September 2026 workbook. Implements the PDF calculations and the qualification/ranking rules approved separately by the user.
 
+The app now has separate **Indian stocks** and **US stocks** tabs. India scans 207 stocks and returns up to 20 bullish and 20 bearish candidates. US scans all 47 supplied instruments and returns up to 8 on each side. Each tab has its own Run Scan button, date, results, indicator views and CSV downloads; one market's scan does not replace the other's results.
+
+US daily dates use America/New_York (including daylight saving), with a conservative 18:00 cutoff for same-day scans because the list includes futures. India retains its 16:00 IST cutoff. Weekends roll back; choose the prior session on holidays. Prices remain in INR or USD without conversion.
+
+The US universe is in data/us_universe.csv. It includes 45 equities and 2 labelled COMEX futures proxies: GC1! → GC=F and SI1! → SI=F. Yahoo futures contracts can roll differently from TradingView continuous symbols. Futures use their own observed sessions, which cannot detect missing vendor dates independently; US runs are marked provisional. BRK.A/BRK.B map to BRK-A/BRK-B. SPCX is preserved unchanged. Exchange labels come from the supplied list. Missing symbols stay visible in Data issues.
+
+Deployment must also include markets.py and data/us_universe.csv. The original CLI remains Indian discovery-only; both markets and indicators are available through app.py.
+
 ## Run daily
 
 ### Streamlit UI and deployment
