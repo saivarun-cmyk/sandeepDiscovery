@@ -4,6 +4,7 @@ from zoneinfo import ZoneInfo
 from discovery import ROOT, universe, download, calculate, rank
 from indicators import indicators
 from markets import MARKETS, latest_date
+SCAN_API_VERSION = 2
 
 
 def run_scan(as_of, progress=None, market='IN'):

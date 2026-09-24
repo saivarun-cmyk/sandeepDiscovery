@@ -10,6 +10,8 @@ The US universe is in data/us_universe.csv. It includes 45 equities and 2 labell
 
 Deployment must also include markets.py and data/us_universe.csv. The original CLI remains Indian discovery-only; both markets and indicators are available through app.py.
 
+Include runtime_bootstrap.py when deploying. It detects scanner helpers retained from an older release and reloads their dependencies before Run Scan is enabled. Deploy all files together. If Community Cloud still shows an older revision after a push, reboot the app through Manage app.
+
 ## Run daily
 
 ### Streamlit UI and deployment

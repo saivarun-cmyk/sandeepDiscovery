@@ -9,6 +9,7 @@ from pathlib import Path
 from zoneinfo import ZoneInfo
 
 ROOT = Path(__file__).resolve().parent
+MARKET_API_VERSION = 1
 
 
 def read_csv(path):

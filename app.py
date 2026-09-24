@@ -2,8 +2,10 @@ from datetime import datetime, timedelta
 from zoneinfo import ZoneInfo
 import pandas as pd
 import streamlit as st
+from runtime_bootstrap import load_scan_service
+
+run_scan = load_scan_service().run_scan
 from discovery import ROOT, universe, FIELDS
-from scan_service import run_scan
 from indicators import INDICATOR_FIELDS
 from markets import MARKETS, latest_date
 
